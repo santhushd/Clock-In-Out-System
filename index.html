@@ -528,7 +528,7 @@
           document.getElementById("statusBox").classList.remove("off");
         }
 
-        if (isBetweenMidnightAndEightAM && clockInCellData != "") {
+        if (isBetweenMidnightAndEightAM && clockInCellData == "") {
           document.getElementById("statusModeTxt").innerText = "Ready";
 
           document.getElementById("clockInBtn").disabled = false;
