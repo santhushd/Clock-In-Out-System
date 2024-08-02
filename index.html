@@ -60,6 +60,28 @@
         font-weight: 600;
         background-color: #7c4dff;
         color: white;
+        position: relative;
+      }
+      .button-content-icon {
+        background-color: white;
+        height: 10px;
+        width: 10px;
+        top: -4px;
+        left: 12px;
+        border-radius: 100%;
+        position: absolute;
+        animation: bounce 1s linear infinite;
+      }
+      @keyframes bounce {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
       .statusMark {
         background-color: #505050 !important;
@@ -179,6 +201,34 @@
           transform: rotate(360deg);
         }
       }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 5px 0;
+        font-size: 10px;
+        text-align: left;
+      }
+
+      table th,
+      table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        position: relative;
+      }
+      .wrapper-table {
+        width: 100%;
+        max-width: 160px;
+        margin: 0 auto;
+      }
+      .table-content-icon {
+        background-color: #dc3545;
+        height: 10px;
+        width: 10px;
+        top: 9px;
+        right: 5px;
+        border-radius: 100%;
+        position: absolute;
+      }
     </style>
   </head>
   <body>
@@ -226,9 +276,41 @@
           >
             2024/01/20
           </p>
+
+          <div class="wrapper">
+            <div class="wrapper-table">
+              <table>
+                <tr>
+                  <td>IN</td>
+                  <td>
+                    <span id="clockInTimeTxt" class="table-content"
+                      >Not Set</span
+                    ><span
+                      id="clockInTimeIcon"
+                      class="table-content-icon"
+                    ></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>OUT</td>
+                  <td>
+                    <span id="clockOutTimeTxt" class="table-content"
+                      >Not Set</span
+                    >
+                    <span
+                      id="clockOutTimeIcon"
+                      class="table-content-icon"
+                    ></span>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
           <div class="wrapper flex-box-column">
             <input class="timeSlot" id="liveTimeInput" type="time" />
             <button onclick="switchClockInMode()" class="btn1" id="clockInBtn">
+              <span id="clockInBtnRedIcon" class="button-content-icon"></span>
               <div class="flex-box-row">
                 <div class="flex-box-column" style="row-gap: 0">
                   <div id="clockInTxt">Clock In</div>
@@ -247,6 +329,7 @@
               class="btn1"
               id="clockOutBtn"
             >
+              <span id="clockOutBtnRedIcon" class="button-content-icon"></span>
               <div class="flex-box-row">
                 <div class="flex-box-column" style="row-gap: 0">
                   <div id="clockOutTxt">Clock Out</div>
@@ -343,7 +426,7 @@
         Nhours = Nhours ? Nhours : 12; // Handle the case where hours = 0
 
         const formattedHours = String(Nhours).padStart(2, "0");
-        const NformattedTime = `${formattedHours}:${minutes} ${ampm}`;
+        const NformattedTime = `${formattedHours}.${minutes} ${ampm}`;
 
         document.getElementById("liveTimeInput").value = formattedTime;
         myInClock = NformattedTime;
@@ -363,7 +446,7 @@
 
       function handleNoteChange(event) {
         myComment = event.target.value;
-        console.log("Note value:", myComment);
+        //console.log("Note value:", myComment);
       }
 
       function handleTimeChange(event) {
@@ -381,15 +464,15 @@
 
         // Format hours to ensure two digits
         const formattedHours = String(Nhours).padStart(2, "0");
-        const NformattedTime = `${formattedHours}:${String(
+        const NformattedTime = `${formattedHours}.${String(
           inputMinutes
         ).padStart(2, "0")} ${ampm}`;
 
         myInClock = NformattedTime;
         myOutClock = NformattedTime;
 
-        console.log("Changed IN Time: " + myInClock);
-        console.log("Changed OUT Time: " + myOutClock);
+        //console.log("Changed IN Time: " + myInClock);
+        //console.log("Changed OUT Time: " + myOutClock);
       }
 
       function logoutDevice() {
@@ -407,8 +490,8 @@
         const columnIdIn = getExcelColumn(day, true);
         const columnIdOut = getExcelColumn(day, false);
 
-        console.log(`Excel Column ID IN: ${columnIdIn}`);
-        console.log(`Excel Column ID OUT: ${columnIdOut}`);
+        //console.log(`Excel Column ID IN: ${columnIdIn}`);
+        //console.log(`Excel Column ID OUT: ${columnIdOut}`);
 
         fetchSheetContent(
           columnIdIn + "1",
@@ -454,8 +537,8 @@
         const day = today.getDate();
         const columnIdIn = getExcelColumn(day, true);
         const columnIdOut = getExcelColumn(day, false);
-        console.log(`Excel Column ID IN: ${columnIdIn}`);
-        console.log(`Excel Column ID OUT: ${columnIdOut}`);
+        //console.log(`Excel Column ID IN: ${columnIdIn}`);
+        //console.log(`Excel Column ID OUT: ${columnIdOut}`);
         fetchSheetContent(
           columnIdIn + "1",
           columnIdIn + rowId,
@@ -509,28 +592,33 @@
         } else {
           clockOutCleared();
         }
+        loadingOverlay.style.display = "none";
       }
 
       function clockInMarked() {
         document.getElementById("clockInBtn").classList.add("statusMark");
+        document.getElementById("clockInBtnRedIcon").style.display = "none";
         document.getElementById("clockInTxt").innerText = "Clocked In";
         document.getElementById("clockInMarkTxt").innerText = "Click to Clear";
       }
 
       function clockInCleared() {
         document.getElementById("clockInBtn").classList.remove("statusMark");
+        document.getElementById("clockInBtnRedIcon").style.display = "block";
         document.getElementById("clockInTxt").innerText = "Clock In";
         document.getElementById("clockInMarkTxt").innerText = "Click to Mark";
       }
 
       function clockOutMarked() {
         document.getElementById("clockOutBtn").classList.add("statusMark");
+        document.getElementById("clockOutBtnRedIcon").style.display = "none";
         document.getElementById("clockOutTxt").innerText = "Clocked Out";
         document.getElementById("clockOutMarkTxt").innerText = "Click to Clear";
       }
 
       function clockOutCleared() {
         document.getElementById("clockOutBtn").classList.remove("statusMark");
+        document.getElementById("clockOutBtnRedIcon").style.display = "block";
         document.getElementById("clockOutTxt").innerText = "Clock Out";
         document.getElementById("clockOutMarkTxt").innerText = "Click to Mark";
       }
@@ -566,7 +654,7 @@
       }
 
       function startDataFetch() {
-        console.log(dataMode);
+        //console.log(dataMode);
         if (dataMode == "Today") {
           todayColumnID();
         } else {
@@ -690,8 +778,29 @@
           document.getElementById("note").value = data[4].comment || "";
           clockInCellData = data[1].content;
           clockOutCellData = data[3].content;
+
+          document.getElementById("clockInTimeTxt").innerText =
+            data[1].content || "Not Set";
+          document.getElementById("clockOutTimeTxt").innerText =
+            data[3].content || "Not Set";
+
+          if (data[1].content == "") {
+            document.getElementById("clockInTimeIcon").style.backgroundColor =
+              "#dc3545";
+          } else {
+            document.getElementById("clockInTimeIcon").style.backgroundColor =
+              "#28a745";
+          }
+
+          if (data[3].content == "") {
+            document.getElementById("clockOutTimeIcon").style.backgroundColor =
+              "#dc3545";
+          } else {
+            document.getElementById("clockOutTimeIcon").style.backgroundColor =
+              "#28a745";
+          }
+
           checkClockInAndClockOutCellData();
-          loadingOverlay.style.display = "none";
         } catch (error) {
           console.error("Error fetching data:", error);
           document.getElementById("sheet-content-1").innerText =
@@ -709,7 +818,7 @@
 
       async function submitDataForm(myCell, myComment, myInputName) {
         buttonDisable();
-        console.log("Hii");
+        //console.log("Hii");
         const formData = new FormData();
 
         formData.set("input_name", myInputName);
