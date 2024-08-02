@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clock In Out System</title>
+    <script
+      src="https://kit.fontawesome.com/01f74f74c3.js"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+      * {
+        font-family: "Inter", sans-serif;
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 12px;
+        background-color: #121212;
+      }
+      .container {
+        background-color: #1f1f1f;
+        color: white;
+        max-width: 350px;
+        text-align: center;
+        margin: 0 auto;
+        border-radius: 8px;
+        border: 1px solid #535353;
+      }
+      .wrapper {
+        margin: 30px 0;
+        padding: 0 30px;
+      }
+      .wrapper-no-margin {
+        margin: 5px 0 !important;
+      }
+      .flex-box-column {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 20px;
+        align-items: center;
+      }
+      .flex-box-row {
+        display: flex;
+        justify-content: space-around;
+        flex-direction: row;
+        align-items: center;
+      }
+      .btn1 {
+        padding: 12px;
+        width: 100%;
+        max-width: 160px;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        background-color: #7c4dff;
+        color: white;
+      }
+      .statusMark {
+        background-color: #505050 !important;
+      }
+      .btn2 {
+        width: 100%;
+        border: none;
+        padding: 12px;
+        background: none;
+        color: white;
+        border: 1px solid #535353;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 400;
+      }
+      .btn3 {
+        padding: 10px;
+        font-weight: 600;
+        border: none;
+        opacity: 0.5;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: 0.2s;
+      }
+      .activeBtn3 {
+        opacity: 1;
+        font-size: 13px;
+      }
+      .card-wrapper {
+        margin: 0 30px;
+        padding: 5px;
+        border: 1px solid #535353;
+        border-radius: 12px;
+      }
+      .dateBtns {
+        justify-content: center !important;
+        column-gap: 5px !important;
+      }
+      .timeSlot {
+        width: 100%;
+        max-width: 160px;
+        border: none;
+        outline: none;
+        padding: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .excel-log {
+        font-size: 11px;
+        text-align: left;
+      }
+      .excel-log-content {
+        font-size: 11px;
+        text-align: left;
+        color: white;
+        opacity: 0.7;
+      }
+      .excel-log-content p {
+        margin: 3px 0;
+        padding: 0;
+        font-weight: 300;
+      }
+      a {
+        color: white;
+      }
+      h1,
+      p {
+        margin: 0;
+        padding: 0;
+      }
+      textarea {
+        width: 100%;
+        resize: vertical;
+        height: 200px;
+        background: none;
+        border: none;
+        outline: none;
+        color: white;
+        border: 1px solid #535353;
+        border-radius: 12px;
+        padding: 12px;
+      }
+      button:active {
+        scale: 0.95;
+      }
+      button:disabled {
+        opacity: 0.3;
+      }
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+
+      .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #fff;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="container" id="askUsername">
+      <div class="wrapper">
+        <p>Username not found!</p>
+        <a style="text-decoration: underline" onclick="enterUsername()"
+          >Login</a
+        >
+      </div>
+    </div>
+
+    <div class="container" id="content">
+      <div class="wrapper">
+        <h1>Devzec</h1>
+        <p>Clock In/Out System</p>
+      </div>
+
+      <div class="wrapper flex-box-row dateBtns">
+        <button onclick="openYesterday()" id="btnYesterday" class="btn3">
+          Yesterday
+        </button>
+        <button onclick="openToday()" id="btnToday" class="btn3 activeBtn3">
+          Today
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-wrapper" style="position: relative">
+          <p
+            id="spanDate"
+            style="
+              position: absolute;
+              top: -16px;
+              left: 50%;
+              padding: 10px;
+              font-size: 12px;
+              background-color: #1f1f1f;
+              transform: translateX(-50%);
+            "
+          >
+            2024/01/20
+          </p>
+          <div class="wrapper flex-box-column">
+            <input class="timeSlot" id="liveTimeInput" type="time" />
+            <button onclick="switchClockInMode()" class="btn1" id="clockInBtn">
+              <div class="flex-box-row">
+                <div class="flex-box-column" style="row-gap: 0">
+                  <div id="clockInTxt">Clock In</div>
+                  <div
+                    id="clockInMarkTxt"
+                    style="font-weight: 400; font-size: 10px"
+                  >
+                    Click to Mark
+                  </div>
+                </div>
+                <div><i class="fa-solid fa-right-to-bracket"></i></div>
+              </div>
+            </button>
+            <button
+              onclick="switchClockOutMode()"
+              class="btn1"
+              id="clockOutBtn"
+            >
+              <div class="flex-box-row">
+                <div class="flex-box-column" style="row-gap: 0">
+                  <div id="clockOutTxt">Clock Out</div>
+                  <div
+                    id="clockOutMarkTxt"
+                    style="font-weight: 400; font-size: 10px"
+                  >
+                    Click to Mark
+                  </div>
+                </div>
+                <div><i class="fa-solid fa-right-from-bracket"></i></div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wrapper flex-box-column">
+        <textarea
+          placeholder="Urgent out note:"
+          name="note"
+          id="note"
+        ></textarea>
+        <button
+          id="noteSubmitButton"
+          onclick="submitDataForm(myOutCell, myComment, '')"
+          class="btn2"
+        >
+          Submit
+        </button>
+      </div>
+
+      <div class="wrapper excel-log">
+        <a
+          id="logoutTxt"
+          style="text-decoration: underline"
+          onclick="logoutDevice()"
+          >Logout:</a
+        >
+        <br /><br />
+        <a
+          href="https://docs.google.com/spreadsheets/d/1thhbZiqJoHqoC44d8RBahOei-xq5bcRCrRpFyaKY5OQ/edit?usp=sharing"
+          target="_blank"
+          >Open Time Sheet</a
+        >
+        <br /><br />
+        <a style="text-decoration: underline" onclick="openExcelLog()"
+          >Excel log</a
+        >
+
+        <div
+          id="excelLogContent"
+          class="excel-log-content"
+          style="display: none"
+        >
+          <br /><br />
+          <p id="todayDay">Date</p>
+          <p id="usernameText">Username</p>
+          <p id="sheet-content-1">IN Column Content</p>
+          <p id="sheet-content-3">OUT Column Content</p>
+          <p id="sheet-content-2">IN Cell Content</p>
+          <p id="sheet-content-4">OUT Cell Content</p>
+          <p id="InColumnID">IN Column ID</p>
+          <p id="OutColumnID">OUT Column ID</p>
+          <p id="InRowID">IN Row ID</p>
+          <p id="OutRowID">OUT Row ID</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let username = "";
+      let rowId = "";
+      let myInClock = "";
+      let myOutClock = "";
+      let myInCell = "";
+      let myOutCell = "";
+      let myComment = "";
+
+      const loadingOverlay = document.getElementById("loadingOverlay");
+
+      const scriptURL =
+        "https://script.google.com/macros/s/AKfycbxd2Xl2tx8d7YUl5wwdBIXMzryiKLc_TXWg80HkDD0KTxT5S993uGpwhfW53GowTQVe/exec";
+
+      function updateTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const formattedTime = `${hours}:${minutes}`;
+        const ampm = hours >= 12 ? "PM" : "AM";
+
+        let Nhours = now.getHours(); // Use let instead of const
+        Nhours = Nhours % 12;
+        Nhours = Nhours ? Nhours : 12; // Handle the case where hours = 0
+
+        const formattedHours = String(Nhours).padStart(2, "0");
+        const NformattedTime = `${formattedHours}:${minutes} ${ampm}`;
+
+        document.getElementById("liveTimeInput").value = formattedTime;
+        myInClock = NformattedTime;
+        myOutClock = NformattedTime;
+      }
+
+      // Update the time immediately and then every second
+      updateTime();
+
+      document
+        .getElementById("liveTimeInput")
+        .addEventListener("change", handleTimeChange);
+
+      document
+        .getElementById("note")
+        .addEventListener("input", handleNoteChange);
+
+      function handleNoteChange(event) {
+        myComment = event.target.value;
+        console.log("Note value:", myComment);
+      }
+
+      function handleTimeChange(event) {
+        const timeValue = event.target.value;
+
+        // Split the time value into hours and minutes
+        const [inputHours, inputMinutes] = timeValue.split(":").map(Number);
+
+        // Determine AM or PM
+        const ampm = inputHours >= 12 ? "PM" : "AM";
+
+        // Convert inputHours from 24-hour to 12-hour format
+        let Nhours = inputHours % 12;
+        Nhours = Nhours ? Nhours : 12; // Handle the case where hours = 0
+
+        // Format hours to ensure two digits
+        const formattedHours = String(Nhours).padStart(2, "0");
+        const NformattedTime = `${formattedHours}:${String(
+          inputMinutes
+        ).padStart(2, "0")} ${ampm}`;
+
+        myInClock = NformattedTime;
+        myOutClock = NformattedTime;
+
+        console.log("Changed IN Time: " + myInClock);
+        console.log("Changed OUT Time: " + myOutClock);
+      }
+
+      function logoutDevice() {
+        localStorage.removeItem("username");
+        location.reload();
+      }
+
+      function yesterdayColumnID() {
+        document.getElementById("btnYesterday").classList.add("activeBtn3");
+        document.getElementById("btnToday").classList.remove("activeBtn3");
+        const today = new Date();
+        today.setDate(today.getDate() - 1); // Subtract one day to get yesterday's date
+
+        const day = today.getDate();
+        const columnIdIn = getExcelColumn(day, true);
+        const columnIdOut = getExcelColumn(day, false);
+
+        console.log(`Excel Column ID IN: ${columnIdIn}`);
+        console.log(`Excel Column ID OUT: ${columnIdOut}`);
+
+        fetchSheetContent(
+          columnIdIn + "1",
+          columnIdIn + rowId,
+          columnIdOut + "1",
+          columnIdOut + rowId,
+          columnIdOut + rowId
+        );
+
+        myInCell = columnIdIn + rowId;
+        myOutCell = columnIdOut + rowId;
+
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const Nday = String(today.getDate()).padStart(2, "0");
+        const formattedDate = `${year}-${month}-${Nday}`;
+
+        updateOtherElements(columnIdIn, columnIdOut, formattedDate);
+      }
+
+      function buttonDisable() {
+        document.getElementById("noteSubmitButton").disabled = true;
+        document.getElementById("clockInBtn").disabled = true;
+        document.getElementById("clockOutBtn").disabled = true;
+      }
+
+      function openExcelLog() {
+        document.getElementById("excelLogContent").style.display = "block";
+      }
+
+      buttonUnable();
+
+      function buttonUnable() {
+        document.getElementById("noteSubmitButton").disabled = false;
+        document.getElementById("clockInBtn").disabled = false;
+        document.getElementById("clockOutBtn").disabled = false;
+      }
+
+      function todayColumnID() {
+        document.getElementById("btnYesterday").classList.remove("activeBtn3");
+        document.getElementById("btnToday").classList.add("activeBtn3");
+        const today = new Date();
+        const day = today.getDate();
+        const columnIdIn = getExcelColumn(day, true);
+        const columnIdOut = getExcelColumn(day, false);
+        console.log(`Excel Column ID IN: ${columnIdIn}`);
+        console.log(`Excel Column ID OUT: ${columnIdOut}`);
+        fetchSheetContent(
+          columnIdIn + "1",
+          columnIdIn + rowId,
+          columnIdOut + "1",
+          columnIdOut + rowId,
+          columnIdOut + rowId
+        );
+
+        myInCell = columnIdIn + rowId;
+        myOutCell = columnIdOut + rowId;
+
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const Nday = String(today.getDate()).padStart(2, "0");
+        const formattedDate = `${year}-${month}-${Nday}`;
+        updateOtherElements(columnIdIn, columnIdOut, formattedDate);
+      }
+
+      let clockInCellData = "";
+      let clockOutCellData = "";
+
+      /////
+
+      function switchClockInMode() {
+        if (clockInCellData != "") {
+          submitDataForm(myInCell, "", "clearCell");
+        } else {
+          submitDataForm(myInCell, "", myInClock);
+        }
+      }
+
+      function switchClockOutMode() {
+        startDataFetch();
+        if (clockOutCellData != "") {
+          submitDataForm(myOutCell, "", "clearCell");
+        } else {
+          submitDataForm(myOutCell, "", myOutClock);
+        }
+      }
+
+      ///
+
+      function checkClockInAndClockOutCellData() {
+        if (clockInCellData != "") {
+          clockInMarked();
+        } else {
+          clockInCleared();
+        }
+        if (clockOutCellData != "") {
+          clockOutMarked();
+        } else {
+          clockOutCleared();
+        }
+      }
+
+      function clockInMarked() {
+        document.getElementById("clockInBtn").classList.add("statusMark");
+        document.getElementById("clockInTxt").innerText = "Clocked In";
+        document.getElementById("clockInMarkTxt").innerText = "Click to Clear";
+      }
+
+      function clockInCleared() {
+        document.getElementById("clockInBtn").classList.remove("statusMark");
+        document.getElementById("clockInTxt").innerText = "Clock In";
+        document.getElementById("clockInMarkTxt").innerText = "Click to Mark";
+      }
+
+      function clockOutMarked() {
+        document.getElementById("clockOutBtn").classList.add("statusMark");
+        document.getElementById("clockOutTxt").innerText = "Clocked Out";
+        document.getElementById("clockOutMarkTxt").innerText = "Click to Clear";
+      }
+
+      function clockOutCleared() {
+        document.getElementById("clockOutBtn").classList.remove("statusMark");
+        document.getElementById("clockOutTxt").innerText = "Clock Out";
+        document.getElementById("clockOutMarkTxt").innerText = "Click to Mark";
+      }
+
+      function updateOtherElements(columnIdIn, columnIdOut, day) {
+        let colInId = columnIdIn;
+        let colOutId = columnIdOut;
+        let todayDay = day;
+        document.getElementById("InColumnID").innerHTML =
+          "IN Column ID: " + colInId + "1";
+        document.getElementById("OutColumnID").innerHTML =
+          "OUT Column ID: " + colOutId + "1";
+        document.getElementById("InRowID").innerHTML =
+          "IN Row ID: " + colInId + rowId;
+        document.getElementById("OutRowID").innerHTML =
+          "OUT Row ID: " + colOutId + rowId;
+        document.getElementById("todayDay").innerHTML = "Date: " + todayDay;
+        document.getElementById("spanDate").innerHTML = todayDay;
+        document.getElementById("usernameText").innerHTML =
+          "Username: " + username;
+      }
+
+      let dataMode = "Today";
+
+      function openToday() {
+        dataMode = "Today";
+        startDataFetch();
+      }
+
+      function openYesterday() {
+        dataMode = "Yesterday";
+        startDataFetch();
+      }
+
+      function startDataFetch() {
+        console.log(dataMode);
+        if (dataMode == "Today") {
+          todayColumnID();
+        } else {
+          yesterdayColumnID();
+        }
+      }
+
+      //comment this
+      loadWebPage();
+
+      function loadWebPage() {
+        let usernameInput = localStorage.getItem("username");
+        if (!usernameInput) {
+          enterUsername();
+        } else {
+          if (
+            usernameInput == "Heshan" ||
+            usernameInput == "Dimuth" ||
+            usernameInput == "Dineth"
+          ) {
+            setAndCheckUser(usernameInput);
+            startWebPage(true);
+          } else {
+            startWebPage(false);
+          }
+        }
+      }
+
+      function enterUsername() {
+        newUsername = prompt("Enter your username:");
+        if (newUsername === null) {
+          enterUsername();
+        } else {
+          localStorage.setItem("username", newUsername);
+          loadWebPage();
+        }
+      }
+
+      function startWebPage(bool) {
+        if (bool) {
+          document.getElementById("content").style.display = "block";
+          document.getElementById("askUsername").style.display = "none";
+          openToday();
+        } else {
+          document.getElementById("content").style.display = "none";
+          document.getElementById("askUsername").style.display = "block";
+        }
+      }
+
+      function setAndCheckUser(usernameInput) {
+        username = usernameInput;
+        document.getElementById("logoutTxt").innerText = "Logout: " + username;
+        if (username == "Dineth") {
+          rowId = "2";
+        } else if (username == "Heshan") {
+          rowId = "3";
+        } else if (username == "Dimuth") {
+          rowId = "4";
+        }
+      }
+
+      function getExcelColumn(day, modeIn) {
+        //let modeIn = true;
+        let newDay = 0;
+
+        let count = day * 2; //by 2
+        //default starting cell is 2nd cell
+
+        //if you want to change start cell to 1, use 2 - 1 = 1;
+        //if you want to change start cell to 2, keep;
+        //if you want to change start cell to 3, use 2 + 1 = 3;
+        //if you want to change start cell to 4, use 2 - 2 = 4;
+
+        let inValue = count; //keep cell
+        let outValue = count + 1; //add 1
+
+        if (modeIn) {
+          newDay = inValue;
+        } else {
+          newDay = outValue;
+        }
+
+        let column = "";
+        while (newDay > 0) {
+          let mod = (newDay - 1) % 26;
+          column = String.fromCharCode(65 + mod) + column;
+          newDay = Math.floor((newDay - mod) / 26);
+        }
+        return column;
+      }
+
+      //get details
+      async function fetchSheetContent(cell1, cell2, cell3, cell4, cell5) {
+        loadingOverlay.style.display = "flex";
+        document.getElementById("sheet-content-1").innerText = "Loading...";
+        document.getElementById("sheet-content-2").innerText = "Loading...";
+        document.getElementById("sheet-content-3").innerText = "Loading...";
+        document.getElementById("sheet-content-4").innerText = "Loading...";
+        document.getElementById("note").value = "";
+        try {
+          const responses = await Promise.all([
+            fetch(`${scriptURL}?cell=${encodeURIComponent(cell1)}`),
+            fetch(`${scriptURL}?cell=${encodeURIComponent(cell2)}`),
+            fetch(`${scriptURL}?cell=${encodeURIComponent(cell3)}`),
+            fetch(`${scriptURL}?cell=${encodeURIComponent(cell4)}`),
+            fetch(`${scriptURL}?cell=${encodeURIComponent(cell5)}`),
+          ]);
+
+          const data = await Promise.all(
+            responses.map((response) => response.json())
+          );
+
+          document.getElementById("sheet-content-1").innerText =
+            "IN Column Content: " + data[0].content || "No content";
+          document.getElementById("sheet-content-2").innerText =
+            "IN Cell Content: " + data[1].content || "No content";
+          document.getElementById("sheet-content-3").innerText =
+            "Out Column Content: " + data[2].content || "No content";
+          document.getElementById("sheet-content-4").innerText =
+            "Out Cell Content: " + data[3].content || "No content";
+          document.getElementById("note").value = data[4].comment || "";
+          clockInCellData = data[1].content;
+          clockOutCellData = data[3].content;
+          checkClockInAndClockOutCellData();
+          loadingOverlay.style.display = "none";
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          document.getElementById("sheet-content-1").innerText =
+            "Failed to load content";
+          document.getElementById("sheet-content-2").innerText =
+            "Failed to load content";
+          document.getElementById("sheet-content-3").innerText =
+            "Failed to load content";
+          document.getElementById("sheet-content-4").innerText =
+            "Failed to load content";
+          document.getElementById("note").value = "Failed to load content";
+          loadingOverlay.style.display = "none";
+        }
+      }
+
+      async function submitDataForm(myCell, myComment, myInputName) {
+        buttonDisable();
+        console.log("Hii");
+        const formData = new FormData();
+
+        formData.set("input_name", myInputName);
+        formData.set("input_cell", myCell);
+        formData.set("input_comment", myComment);
+
+        try {
+          const response = await fetch(scriptURL, {
+            method: "POST",
+            body: formData,
+          });
+          if (response.ok) {
+            //form.reset();
+            buttonUnable();
+            startDataFetch();
+          } else {
+            const errorText = await response.text(); // Get the response text for more details
+            throw new Error(`Failed: ${response.status} ${errorText}`);
+          }
+        } catch (error) {
+          alert(`Failed2: ${error.message}`);
+        } finally {
+          //   do something
+        }
+      }
+    </script>
+  </body>
+</html>
