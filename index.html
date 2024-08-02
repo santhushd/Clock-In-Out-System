@@ -513,7 +513,8 @@
           (hours === startHour && minutes >= 0) ||
           (hours > startHour && hours < endHour);
 
-        const isPastTheEndTime = hours > endHour;
+        const isPastTheEndTime =
+          hours > endHour || (hours === endHour && minutes > 0);
 
         if (isPastTheEndTime && clockInCellData == "") {
           document.getElementById("statusModeTxt").innerText = "Late";
