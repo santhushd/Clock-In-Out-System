@@ -229,6 +229,52 @@
         border-radius: 100%;
         position: absolute;
       }
+      .status {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        border-radius: 5px;
+        border: none;
+        column-gap: 5px;
+        position: absolute;
+        left: 8px;
+        top: 8px;
+        font-size: 11px;
+        padding: 5px;
+      }
+      .ready {
+        background-color: #ffc107;
+        color: black;
+      }
+      .late {
+        background-color: #dc3545;
+      }
+      .working {
+        background-color: #007bff;
+      }
+      .off {
+        background-color: #28a745;
+      }
+      .status span.icon {
+        width: 8px;
+        border-radius: 100%;
+        height: 8px;
+        background: white;
+      }
+      .working span.icon {
+        animation: blink 1s infinite;
+      }
+      @keyframes blink {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
     </style>
   </head>
   <body>
@@ -245,7 +291,11 @@
       </div>
     </div>
 
-    <div class="container" id="content">
+    <div class="container" id="content" style="position: relative">
+      <div class="status late" style="position: absolute" id="statusBox">
+        <span class="icon"></span>
+        <span id="statusModeTxt">Mode</span>
+      </div>
       <div class="wrapper">
         <h1>Devzec</h1>
         <p>Clock In/Out System</p>
@@ -409,6 +459,9 @@
       let myOutCell = "";
       let myComment = "";
 
+      let clockInCellData = "";
+      let clockOutCellData = "";
+
       const loadingOverlay = document.getElementById("loadingOverlay");
 
       const scriptURL =
@@ -435,6 +488,69 @@
 
       // Update the time immediately and then every second
       updateTime();
+
+      function refreshMode() {
+        if (clockInCellData != "" && clockOutCellData != "") {
+          document.getElementById("statusModeTxt").innerText = "Off";
+
+          document.getElementById("clockInBtn").disabled = true;
+          document.getElementById("clockOutBtn").disabled = false;
+
+          document.getElementById("statusBox").classList.remove("ready");
+          document.getElementById("statusBox").classList.remove("late");
+          document.getElementById("statusBox").classList.remove("working");
+          document.getElementById("statusBox").classList.add("off");
+        }
+        const currentTime = new Date();
+        const hours = currentTime.getHours();
+        const minutes = currentTime.getMinutes();
+
+        // Define the time ranges in hours and minutes
+        const startHour = 0; // 12:00 AM
+        const endHour = 8; // 8:00 AM
+
+        const isBetweenMidnightAndEightAM =
+          (hours === startHour && minutes >= 0) ||
+          (hours > startHour && hours < endHour);
+
+        const isPastTheEndTime = hours > endHour;
+
+        if (isPastTheEndTime && clockInCellData == "") {
+          document.getElementById("statusModeTxt").innerText = "Late";
+
+          document.getElementById("clockInBtn").disabled = false;
+          document.getElementById("clockOutBtn").disabled = true;
+
+          document.getElementById("statusBox").classList.remove("ready");
+          document.getElementById("statusBox").classList.add("late");
+          document.getElementById("statusBox").classList.remove("working");
+          document.getElementById("statusBox").classList.remove("off");
+        }
+
+        if (isBetweenMidnightAndEightAM && clockInCellData != "") {
+          document.getElementById("statusModeTxt").innerText = "Ready";
+
+          document.getElementById("clockInBtn").disabled = false;
+          document.getElementById("clockOutBtn").disabled = true;
+
+          document.getElementById("statusBox").classList.add("ready");
+          document.getElementById("statusBox").classList.remove("late");
+          document.getElementById("statusBox").classList.remove("working");
+          document.getElementById("statusBox").classList.remove("off");
+        } else {
+          if (clockInCellData != "" && clockOutCellData == "") {
+            document.getElementById("statusModeTxt").innerText = "Working";
+
+            document.getElementById("clockInBtn").disabled = false;
+            document.getElementById("clockOutBtn").disabled = false;
+
+            document.getElementById("statusBox").classList.remove("ready");
+            document.getElementById("statusBox").classList.remove("late");
+            document.getElementById("statusBox").classList.add("working");
+            document.getElementById("statusBox").classList.remove("off");
+          }
+        }
+      }
 
       document
         .getElementById("liveTimeInput")
@@ -557,9 +673,6 @@
         updateOtherElements(columnIdIn, columnIdOut, formattedDate);
       }
 
-      let clockInCellData = "";
-      let clockOutCellData = "";
-
       /////
 
       function switchClockInMode() {
@@ -593,6 +706,7 @@
           clockOutCleared();
         }
         loadingOverlay.style.display = "none";
+        refreshMode();
       }
 
       function clockInMarked() {
@@ -800,7 +914,10 @@
               "#28a745";
           }
 
+          buttonUnable();
+
           checkClockInAndClockOutCellData();
+          loadingOverlay.style.display = "none";
         } catch (error) {
           console.error("Error fetching data:", error);
           document.getElementById("sheet-content-1").innerText =
@@ -832,7 +949,6 @@
           });
           if (response.ok) {
             //form.reset();
-            buttonUnable();
             startDataFetch();
           } else {
             const errorText = await response.text(); // Get the response text for more details
